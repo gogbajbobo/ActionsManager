@@ -203,6 +203,14 @@
 				LastUpgradeCheck = 0510;
 				ORGANIZATIONNAME = "Sistemium UAB";
 				TargetAttributes = {
+					2CFCD1FF191636D7002DC1A6 = {
+						DevelopmentTeam = DP58H3X45C;
+						SystemCapabilities = {
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+						};
+					};
 					2CFCD223191636D7002DC1A6 = {
 						TestTargetID = 2CFCD1FF191636D7002DC1A6;
 					};
@@ -391,10 +399,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "ActionsManager/ActionsManager-Prefix.pch";
 				INFOPLIST_FILE = "ActionsManager/ActionsManager-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -404,10 +415,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "ActionsManager/ActionsManager-Prefix.pch";
 				INFOPLIST_FILE = "ActionsManager/ActionsManager-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
@@ -471,6 +485,7 @@
 				2CFCD237191636D7002DC1A6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		2CFCD238191636D7002DC1A6 /* Build configuration list for PBXNativeTarget "ActionsManagerTests" */ = {
 			isa = XCConfigurationList;
@@ -479,6 +494,7 @@
 				2CFCD23A191636D7002DC1A6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

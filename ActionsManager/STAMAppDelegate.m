@@ -8,39 +8,132 @@
 
 #import "STAMAppDelegate.h"
 
+@interface STAMAppDelegate()
+
+@property (nonatomic, strong) NSMutableData *responseData;
+
+@end
+
 @implementation STAMAppDelegate
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
-{
-    // Override point for customization after application launch.
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    
+	application.applicationIconBadgeNumber = 0;
+    
+    [application setMinimumBackgroundFetchInterval:UIApplicationBackgroundFetchIntervalMinimum];
+    
+    [[UIApplication sharedApplication] registerForRemoteNotificationTypes:
+     (UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert)];
+    
+    if(launchOptions!=nil){
+        
+        NSDictionary *remoteNotification = [launchOptions objectForKey:UIApplicationLaunchOptionsRemoteNotificationKey];
+        NSString *msg = [NSString stringWithFormat:@"didFinishLaunchingWithOptions: %@", [[remoteNotification objectForKey:@"aps"] objectForKey:@"alert"]];
+        NSLog(@"didFinishLaunchingWithOptions %@",msg);
+        [self createAlert:msg];
+        
+    }
+    
     return YES;
-}
-							
-- (void)applicationWillResignActive:(UIApplication *)application
-{
-    // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
-    // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
+    
 }
 
-- (void)applicationDidEnterBackground:(UIApplication *)application
-{
-    // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later. 
-    // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+- (void)application:(UIApplication *)application performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
+    
+    [self sendRequest];
+    completionHandler(UIBackgroundFetchResultNewData);
+    
 }
 
-- (void)applicationWillEnterForeground:(UIApplication *)application
-{
-    // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
+- (void)application:(UIApplication*)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData*)deviceToken {
+    
+	NSLog(@"deviceToken: %@", deviceToken);
+    
 }
 
-- (void)applicationDidBecomeActive:(UIApplication *)application
-{
-    // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+- (void)application:(UIApplication*)application didFailToRegisterForRemoteNotificationsWithError:(NSError*)error {
+    
+	NSLog(@"Failed to register with error : %@", error);
+    
 }
 
-- (void)applicationWillTerminate:(UIApplication *)application
-{
-    // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
+    
+    application.applicationIconBadgeNumber = 0;
+    NSString *msg = [NSString stringWithFormat:@"%@", userInfo];
+    NSLog(@"didReceiveRemoteNotification %@",msg);
+    [self createAlert:msg];
+    [self sendRequest];
+    completionHandler(UIBackgroundFetchResultNewData);
+    
 }
+
+- (void)createAlert:(NSString *)msg {
+    
+    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Message Received" message:[NSString stringWithFormat:@"%@", msg]delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+    [alertView show];
+    
+}
+
+- (void)sendRequest {
+    
+    NSURL *url = [NSURL URLWithString:@"http://10.0.0.4/~grimax/srvcs/check_apns.php"];
+    NSURLRequest *request = [[NSURLRequest alloc] initWithURL:url];
+    NSURLConnection *connection = [[NSURLConnection alloc] initWithRequest:request delegate:self];
+    
+    if (!connection) {
+        NSLog(@"connection error");
+    }
+    
+}
+
+#pragma mark - NSURLConnectionDataDelegate
+
+- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
+
+    NSString *errorMessage = [NSString stringWithFormat:@"connection did fail with error: %@", error];
+    NSLog(@"errorMessage %@", errorMessage);
+
+}
+
+- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
+    
+    NSInteger statusCode = [(NSHTTPURLResponse *)response statusCode];
+    NSDictionary *headers = [(NSHTTPURLResponse *)response allHeaderFields];
+
+    self.responseData = [NSMutableData data];
+
+    if (statusCode == 200) {
+        
+        NSString *lastModified = [headers objectForKey:@"Last-Modified"];
+        if (lastModified) {
+            NSLog(@"lastModified %@", lastModified);
+        }
+        NSLog(@"200");
+        
+        [UIApplication sharedApplication].applicationIconBadgeNumber = 10;
+        
+    } else if (statusCode == 304) {
+        
+        NSLog(@"304 Not Modified");
+        
+    }
+    
+}
+
+- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
+    [self.responseData appendData:data];
+}
+
+- (void)connectionDidFinishLoading:(NSURLConnection *)connection {
+    
+    //    NSString *dataPath = [[NSBundle mainBundle] pathForResource:@"test" ofType:@"json"];
+    //    self.responseData = [NSData dataWithContentsOfFile:dataPath];
+    
+    NSString *responseString = [[NSString alloc] initWithData:self.responseData encoding:NSUTF8StringEncoding];
+    NSLog(@"connectionDidFinishLoading responseData %@", responseString);
+
+}
+
 
 @end
